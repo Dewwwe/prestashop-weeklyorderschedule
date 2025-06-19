@@ -1,34 +1,70 @@
 <?php
 /**
- * 2007-2025 PrestaShop
- *
- * NOTICE OF LICENSE
- *
- * This source file is subject to the Academic Free License (AFL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available through the world-wide-web at this URL:
- * http://opensource.org/licenses/afl-3.0.php
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to license@prestashop.com so we can send you a copy immediately.
- *
- * DISCLAIMER
- *
- * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
- * versions in the future. If you wish to customize PrestaShop for your
- * needs please refer to http://www.prestashop.com for more information.
- *
- * @author    PrestaShop SA <contact@prestashop.com>
- * @copyright 2007-2025 PrestaShop SA
- * @license   http://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
- * International Registered Trademark & Property of PrestaShop SA
+ * Controller for Carrier Postcode Restriction settings
  */
 
 class AdminWeeklyOrderScheduleController extends ModuleAdminController
 {
     public function __construct()
     {
+        $this->bootstrap = true;
+        $this->display = 'view';
+        
         parent::__construct();
-        Tools::redirectAdmin($this->context->link->getAdminLink('AdminModules') . '&configure=weeklyorderschedule');
+
+        $this->meta_title = $this->module->getTranslator()->trans('Weekly order schedule', [], 'Modules.Weeklyorderschedule.Admin');
+        // Set page title
+        $this->page_header_toolbar_title = $this->module->getTranslator()->trans('Weekly order schedule', [], 'Modules.Weeklyorderschedule.Admin');
+
+        // Remove default actions
+        $this->actions = array();
+        $this->list_no_link = true;
+    }
+    
+    /**
+     * Render the configuration page
+     * @return string HTML content
+     */
+    public function renderView()
+    {
+        // Instead of calling getContent(), we'll replicate its functionality here
+        $output = '';
+        
+        // Load the module explicitly for better linting
+        /** @var Weeklyorderschedule $module */
+        $module = $this->module;
+
+        // Process form submission
+        if ((bool)Tools::isSubmit('submitWeeklyorderscheduleModule')) {
+            // Store the result of postProcess() in a variable
+            $processResult = $module->postProcess();
+            if ($processResult) {
+                $output .= $processResult;
+            }
+
+            // Add confirmation message directly to controller
+            $this->confirmations[] = $this->module->getTranslator()->trans('Settings updated successfully', [], 'Modules.Weeklyorderschedule.Admin');
+        }
+
+        $this->context->smarty->assign('module_dir', $this->module->getLocalPath());
+        $output .= $this->context->smarty->fetch($this->module->getLocalPath().'views/templates/admin/configure.tpl');
+        $output .= $module->renderForm();
+        
+        return $output;
+    }
+    
+    /**
+     * Process the form submission
+     * @return void
+     */
+    public function postProcess()
+    {
+        // Let the module handle form submission
+        if (Tools::isSubmit('submitCarrierpostcoderestrictionModule')) {
+            // Don't call parent::postProcess() to avoid double processing
+            return;
+        }
+        
+        parent::postProcess();
     }
 }

@@ -152,7 +152,7 @@ class Weeklyorderschedule extends Module
     /**
      * Create the form that will be displayed in the configuration of your module.
      */
-    protected function renderForm()
+    public function renderForm()
     {
         $helper = new HelperForm();
 
@@ -164,9 +164,18 @@ class Weeklyorderschedule extends Module
 
         $helper->identifier = $this->identifier;
         $helper->submit_action = 'submitWeeklyorderscheduleModule';
-        $helper->currentIndex = $this->context->link->getAdminLink('AdminModules', false)
-            . '&configure=' . $this->name . '&tab_module=' . $this->tab . '&module_name=' . $this->name;
-        $helper->token = Tools::getAdminTokenLite('AdminModules');
+
+        // Set the correct form action URL based on context
+        if (Tools::getValue('controller') == 'AdminWeeklyOrderSchedule') {
+            // We're in the controller
+            $helper->currentIndex = $this->context->link->getAdminLink('AdminWeeklyOrderSchedule');
+        } else {
+            // We're in the module configuration
+            $helper->currentIndex = $this->context->link->getAdminLink('AdminModules', false)
+                . '&configure=' . $this->name . '&tab_module=' . $this->tab . '&module_name=' . $this->name;
+        }
+
+        $helper->token = Tools::getValue('token');
 
         $helper->tpl_vars = array(
             'fields_value' => $this->getConfigFormValues(), /* Add values for your inputs */
@@ -193,9 +202,53 @@ class Weeklyorderschedule extends Module
         ];
 
         $form_inputs = [
+            array(
+                'type' => 'html',
+                'name' => 'form_layout_start',
+                'html_content' => '<style>
+                        .form-wrapper .form-group label.control-label {
+                            width: 100%;
+                            padding: 0;
+                        }
+                        .form-wrapper .form-group label.control-label.col-lg-4 {
+                            width: fit-content;
+                        }
+                        .form-wrapper .form-group:has(.control-label.col-lg-4) {
+                            display: flex;
+                            flex-direction: row-reverse;
+                            align-items: center;
+                            width: 350px;
+                        }
+                        .bootstrap .prestashop-switch {
+                            margin-top: 0;
+                        }
+                        .form-wrapper .form-group .col-lg-9,
+                        .form-wrapper .form-group .col-lg-8,
+                        .form-wrapper .form-group .col-lg-6 {
+                            width: 100%;
+                            float: none;
+                        }
+                        .form-wrapper .form-group {
+                            margin-bottom: 4px;
+                        }
+                        @media (min-width: 1200px) {
+                            .bootstrap .col-lg-offset-3 {
+                                margin-left: 0;
+                            }
+                        }
+                        h4 {
+                            margin-top: 16px;
+                        }
+                    </style>',
+            ),
+            array(
+                'type' => 'html',
+                'name' => 'weekly_module_label',
+                'html_content' => '<h4>' . $this->trans('Enable module', [], 'Modules.Weeklyorderschedule.Admin') . '</h4>',
+            ),
             [
                 'type' => 'switch',
-                'label' => $this->trans('Enable module', [], 'Modules.Weeklyorderschedule.Admin'),
+                'label' => '',
                 'name' => 'WEEKLYORDERSCHEDULE_LIVE_MODE',
                 'is_bool' => true,
                 'desc' => $this->trans('Enable or disable the module functionality', [], 'Modules.Weeklyorderschedule.Admin'),
@@ -212,10 +265,15 @@ class Weeklyorderschedule extends Module
                     ]
                 ],
             ],
+            array(
+                'type' => 'html',
+                'name' => 'weekdays_label',
+                'html_content' => '<h4>' . $this->trans('Order Days Configuration', [], 'Modules.Weeklyorderschedule.Admin') . '</h4>',
+            ),
             [
                 'type' => 'html',
                 'name' => 'days_header',
-                'html_content' => '<h3>' . $this->trans('Order Days Configuration', [], 'Modules.Weeklyorderschedule.Admin') . '</h3>
+                'html_content' => '
                     <div class="alert alert-info">' .
                     $this->trans('Enable the days when customers can place orders. On disabled days, customers can still browse and add products to cart, but all carriers will be hidden during checkout.', [], 'Modules.Weeklyorderschedule.Admin') .
                     '</div>',
@@ -281,7 +339,7 @@ class Weeklyorderschedule extends Module
     /**
      * Save form data.
      */
-    protected function postProcess()
+    public function postProcess()
     {
         $days_config = [];
         $days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
@@ -299,6 +357,8 @@ class Weeklyorderschedule extends Module
         Configuration::updateValue('WEEKLYORDERSCHEDULE_DAYS', json_encode($days_config));
 
         $this->context->controller->confirmations[] = $this->trans('Settings updated successfully', [], 'Modules.Weeklyorderschedule.Admin');
+
+        // return $this->displayConfirmation($this->trans('Settings updated successfully', [], 'Modules.Weeklyorderschedule.Admin'));
     }
 
     /**
