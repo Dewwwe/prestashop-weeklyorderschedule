@@ -36,7 +36,7 @@ class Weeklyorderschedule extends Module
     {
         $this->name = 'weeklyorderschedule';
         $this->tab = 'checkout';
-        $this->version = '0.0.1';
+        $this->version = '1.0.0';
         $this->author = 'dewwwe';
         $this->need_instance = 0;
 

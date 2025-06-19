@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file original="admin-lpdy" source-language="fr-FR" target-language="fr-FR" datatype="plaintext">
+    <body>
+      <trans-unit id="3bc48a8c4a05ccf585b64c175eaed92b">
+        <source>Weekly order schedule</source>
+        <target>Calendrier des commandes hebdomadaires</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="4122e9797b46d4cdf58461ba54e2779e">
+        <source>Disable ordering on specific weekdays by removing all carrier options</source>
+        <target>Désactiver les commandes pour certains jours de la semaine en supprimant toutes les options de transporteur</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="2d36e784d170c3cfc8c423c78da741fb">
+        <source>Order days</source>
+        <target>Jours de commande</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="6f8522e0610541f1ef215a22ffa66ff6">
+        <source>Monday</source>
+        <target>Lundi</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="5792315f09a5d54fb7e3d066672b507f">
+        <source>Tuesday</source>
+        <target>Mardi</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="796c163589f295373e171842f37265d5">
+        <source>Wednesday</source>
+        <target>Mercredi</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="78ae6f0cd191d25147e252dc54768238">
+        <source>Thursday</source>
+        <target>Jeudi</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="c33b138a163847cdb6caeeb7c9a126b4">
+        <source>Friday</source>
+        <target>Vendredi</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="8b7051187b9191cdcdae6ed5a10e5adc">
+        <source>Saturday</source>
+        <target>Samedi</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="9d1a0949c39e66a0cd65240bc0ac9177">
+        <source>Sunday</source>
+        <target>Dimanche</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="7a01a554b2fe1ebe7f033013913d66b3">
+        <source>Enable module</source>
+        <target>Activer le module</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="fb29285415c1866ecff6a2edd6707980">
+        <source>Enable or disable the module functionality</source>
+        <target>Activer ou désactiver la fonctionnalité du module</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="d783310c97bed0e50cf5e54c48ce8ee6">
+        <source>Order Days Configuration</source>
+        <target>Configuration des jours de commande</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="611801c43bd03f6799bd8825aa815562">
+        <source>Enable the days when customers can place orders. On disabled days, customers can still browse and add products to cart, but all carriers will be hidden during checkout.</source>
+        <target>Permet d'activer les jours où les clients peuvent passer des commandes. Les jours désactivés, les clients peuvent toujours parcourir et ajouter des produits au panier, mais tous les transporteurs seront masqués lors de la commande.</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="462390017ab0938911d2d4e964c0cab7">
+        <source>Settings updated successfully</source>
+        <target>Mise à jour des paramètres réussie</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="b365704f9b8c8e92d43d32ac42038b62">
+        <source>This module allows you to disable ordering on specific weekdays by removing all carrier options from the list at checkout.</source>
+        <target>Ce module vous permet de désactiver les commandes pour certains jours de la semaine en supprimant toutes les options de transporteur de la liste au moment de la commande.</target>
+        <note>Line: </note>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>
