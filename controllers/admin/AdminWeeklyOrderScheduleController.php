@@ -41,9 +41,6 @@ class AdminWeeklyOrderScheduleController extends ModuleAdminController
             if ($processResult) {
                 $output .= $processResult;
             }
-
-            // Add confirmation message directly to controller
-            $this->confirmations[] = $this->module->getTranslator()->trans('Settings updated successfully', [], 'Modules.Weeklyorderschedule.Admin');
         }
 
         $this->context->smarty->assign('module_dir', $this->module->getLocalPath());

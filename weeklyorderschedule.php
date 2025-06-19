@@ -36,7 +36,7 @@ class Weeklyorderschedule extends Module
     {
         $this->name = 'weeklyorderschedule';
         $this->tab = 'checkout';
-        $this->version = '1.0.0';
+        $this->version = '1.0.1';
         $this->author = 'dewwwe';
         $this->need_instance = 0;
 
@@ -135,16 +135,21 @@ class Weeklyorderschedule extends Module
      */
     public function getContent()
     {
+        $output = '';
+
         /**
          * If values have been submitted in the form, process.
          */
         if (((bool) Tools::isSubmit('submitWeeklyorderscheduleModule')) == true) {
-            $this->postProcess();
+            $processResult = $this->postProcess();
+            if ($processResult) {
+                $output .= $processResult;
+            }
         }
 
         $this->context->smarty->assign('module_dir', $this->_path);
 
-        $output = $this->context->smarty->fetch($this->local_path . 'views/templates/admin/configure.tpl');
+        $output .= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/configure.tpl');
 
         return $output . $this->renderForm();
     }
@@ -356,9 +361,8 @@ class Weeklyorderschedule extends Module
         // Save the days configuration as JSON
         Configuration::updateValue('WEEKLYORDERSCHEDULE_DAYS', json_encode($days_config));
 
-        $this->context->controller->confirmations[] = $this->trans('Settings updated successfully', [], 'Modules.Weeklyorderschedule.Admin');
 
-        // return $this->displayConfirmation($this->trans('Settings updated successfully', [], 'Modules.Weeklyorderschedule.Admin'));
+        return $this->displayConfirmation($this->trans('Settings updated successfully', [], 'Modules.Weeklyorderschedule.Admin'));
     }
 
     /**
