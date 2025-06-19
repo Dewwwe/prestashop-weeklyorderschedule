@@ -1,28 +1,28 @@
 <?php
 /**
-* 2007-2025 PrestaShop
-*
-* NOTICE OF LICENSE
-*
-* This source file is subject to the Academic Free License (AFL 3.0)
-* that is bundled with this package in the file LICENSE.txt.
-* It is also available through the world-wide-web at this URL:
-* http://opensource.org/licenses/afl-3.0.php
-* If you did not receive a copy of the license and are unable to
-* obtain it through the world-wide-web, please send an email
-* to license@prestashop.com so we can send you a copy immediately.
-*
-* DISCLAIMER
-*
-* Do not edit or add to this file if you wish to upgrade PrestaShop to newer
-* versions in the future. If you wish to customize PrestaShop for your
-* needs please refer to http://www.prestashop.com for more information.
-*
-*  @author    PrestaShop SA <contact@prestashop.com>
-*  @copyright 2007-2025 PrestaShop SA
-*  @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
-*  International Registered Trademark & Property of PrestaShop SA
-*/
+ * 2007-2025 PrestaShop
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/afl-3.0.php
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@prestashop.com so we can send you a copy immediately.
+ *
+ * DISCLAIMER
+ *
+ * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
+ * versions in the future. If you wish to customize PrestaShop for your
+ * needs please refer to http://www.prestashop.com for more information.
+ *
+ *  @author    PrestaShop SA <contact@prestashop.com>
+ *  @copyright 2007-2025 PrestaShop SA
+ *  @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ *  International Registered Trademark & Property of PrestaShop SA
+ */
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -59,7 +59,11 @@ class Weeklyorderschedule extends Module
      */
     public function install()
     {
-        return parent::install() 
+        // Initialize default configuration
+        Configuration::updateValue('WEEKLYORDERSCHEDULE_DAYS', json_encode($this->getDefaultDaysConfig()));
+        Configuration::updateValue('WEEKLYORDERSCHEDULE_LIVE_MODE', values: false);
+
+        return parent::install()
             // Add JS & CSS to front office
             && $this->registerHook('header')
             // Add JS @ CSS to back office
@@ -72,6 +76,10 @@ class Weeklyorderschedule extends Module
 
     public function uninstall()
     {
+        // Remove configuration values
+        Configuration::deleteByName('WEEKLYORDERSCHEDULE_DAYS');
+        Configuration::deleteByName('WEEKLYORDERSCHEDULE_LIVE_MODE');
+
         // Uninstall tabs
         $this->uninstallTab();
 
@@ -130,15 +138,15 @@ class Weeklyorderschedule extends Module
         /**
          * If values have been submitted in the form, process.
          */
-        if (((bool)Tools::isSubmit('submitWeeklyorderscheduleModule')) == true) {
+        if (((bool) Tools::isSubmit('submitWeeklyorderscheduleModule')) == true) {
             $this->postProcess();
         }
 
         $this->context->smarty->assign('module_dir', $this->_path);
 
-        $output = $this->context->smarty->fetch($this->local_path.'views/templates/admin/configure.tpl');
+        $output = $this->context->smarty->fetch($this->local_path . 'views/templates/admin/configure.tpl');
 
-        return $output.$this->renderForm();
+        return $output . $this->renderForm();
     }
 
     /**
@@ -157,7 +165,7 @@ class Weeklyorderschedule extends Module
         $helper->identifier = $this->identifier;
         $helper->submit_action = 'submitWeeklyorderscheduleModule';
         $helper->currentIndex = $this->context->link->getAdminLink('AdminModules', false)
-            .'&configure='.$this->name.'&tab_module='.$this->tab.'&module_name='.$this->name;
+            . '&configure=' . $this->name . '&tab_module=' . $this->tab . '&module_name=' . $this->name;
         $helper->token = Tools::getAdminTokenLite('AdminModules');
 
         $helper->tpl_vars = array(
@@ -174,63 +182,100 @@ class Weeklyorderschedule extends Module
      */
     protected function getConfigForm()
     {
-        return array(
-            'form' => array(
-                'legend' => array(
-                'title' => $this->l('Settings'),
-                'icon' => 'icon-cogs',
-                ),
-                'input' => array(
-                    array(
-                        'type' => 'switch',
-                        'label' => $this->l('Live mode'),
-                        'name' => 'WEEKLYORDERSCHEDULE_LIVE_MODE',
-                        'is_bool' => true,
-                        'desc' => $this->l('Use this module in live mode'),
-                        'values' => array(
-                            array(
-                                'id' => 'active_on',
-                                'value' => true,
-                                'label' => $this->l('Enabled')
-                            ),
-                            array(
-                                'id' => 'active_off',
-                                'value' => false,
-                                'label' => $this->l('Disabled')
-                            )
-                        ),
-                    ),
-                    array(
-                        'col' => 3,
-                        'type' => 'text',
-                        'prefix' => '<i class="icon icon-envelope"></i>',
-                        'desc' => $this->l('Enter a valid email address'),
-                        'name' => 'WEEKLYORDERSCHEDULE_ACCOUNT_EMAIL',
-                        'label' => $this->l('Email'),
-                    ),
-                    array(
-                        'type' => 'password',
-                        'name' => 'WEEKLYORDERSCHEDULE_ACCOUNT_PASSWORD',
-                        'label' => $this->l('Password'),
-                    ),
-                ),
-                'submit' => array(
-                    'title' => $this->l('Save'),
-                ),
-            ),
-        );
+        $days = [
+            'monday' => $this->trans('Monday', [], 'Modules.Weeklyorderschedule.Admin'),
+            'tuesday' => $this->trans('Tuesday', [], 'Modules.Weeklyorderschedule.Admin'),
+            'wednesday' => $this->trans('Wednesday', [], 'Modules.Weeklyorderschedule.Admin'),
+            'thursday' => $this->trans('Thursday', [], 'Modules.Weeklyorderschedule.Admin'),
+            'friday' => $this->trans('Friday', [], 'Modules.Weeklyorderschedule.Admin'),
+            'saturday' => $this->trans('Saturday', [], 'Modules.Weeklyorderschedule.Admin'),
+            'sunday' => $this->trans('Sunday', [], 'Modules.Weeklyorderschedule.Admin'),
+        ];
+
+        $form_inputs = [
+            [
+                'type' => 'switch',
+                'label' => $this->trans('Enable module', [], 'Modules.Weeklyorderschedule.Admin'),
+                'name' => 'WEEKLYORDERSCHEDULE_LIVE_MODE',
+                'is_bool' => true,
+                'desc' => $this->trans('Enable or disable the module functionality', [], 'Modules.Weeklyorderschedule.Admin'),
+                'values' => [
+                    [
+                        'id' => 'active_on',
+                        'value' => true,
+                        'label' => $this->trans('Enabled', [], 'Admin.Global')
+                    ],
+                    [
+                        'id' => 'active_off',
+                        'value' => false,
+                        'label' => $this->trans('Disabled', [], 'Admin.Global')
+                    ]
+                ],
+            ],
+            [
+                'type' => 'html',
+                'name' => 'days_header',
+                'html_content' => '<h3>' . $this->trans('Order Days Configuration', [], 'Modules.Weeklyorderschedule.Admin') . '</h3>
+                    <div class="alert alert-info">' .
+                    $this->trans('Enable the days when customers can place orders. On disabled days, customers can still browse and add products to cart, but all carriers will be hidden during checkout.', [], 'Modules.Weeklyorderschedule.Admin') .
+                    '</div>',
+            ],
+        ];
+
+        // Add a switch for each day of the week
+        foreach ($days as $day_key => $day_name) {
+            $form_inputs[] = [
+                'type' => 'switch',
+                'label' => $day_name,
+                'name' => 'WEEKLYORDERSCHEDULE_DAY_' . strtoupper($day_key),
+                'is_bool' => true,
+                'values' => [
+                    [
+                        'id' => $day_key . '_on',
+                        'value' => true,
+                        'label' => $this->trans('Enabled', [], 'Admin.Global')
+                    ],
+                    [
+                        'id' => $day_key . '_off',
+                        'value' => false,
+                        'label' => $this->trans('Disabled', [], 'Admin.Global')
+                    ]
+                ],
+            ];
+        }
+
+        return [
+            'form' => [
+                'legend' => [
+                    'title' => $this->trans('Settings', [], 'Admin.Global'),
+                    'icon' => 'icon-cogs',
+                ],
+                'input' => $form_inputs,
+                'submit' => [
+                    'title' => $this->trans('Save', [], 'Admin.Actions'),
+                ],
+            ],
+        ];
     }
+
 
     /**
      * Set values for the inputs.
      */
     protected function getConfigFormValues()
     {
-        return array(
+        $days_config = json_decode(Configuration::get('WEEKLYORDERSCHEDULE_DAYS', json_encode($this->getDefaultDaysConfig())), true);
+
+        $values = [
             'WEEKLYORDERSCHEDULE_LIVE_MODE' => Configuration::get('WEEKLYORDERSCHEDULE_LIVE_MODE', true),
-            'WEEKLYORDERSCHEDULE_ACCOUNT_EMAIL' => Configuration::get('WEEKLYORDERSCHEDULE_ACCOUNT_EMAIL', 'contact@prestashop.com'),
-            'WEEKLYORDERSCHEDULE_ACCOUNT_PASSWORD' => Configuration::get('WEEKLYORDERSCHEDULE_ACCOUNT_PASSWORD', null),
-        );
+        ];
+
+        // Add values for each day
+        foreach ($days_config as $day => $enabled) {
+            $values['WEEKLYORDERSCHEDULE_DAY_' . strtoupper($day)] = $enabled;
+        }
+
+        return $values;
     }
 
     /**
@@ -238,21 +283,32 @@ class Weeklyorderschedule extends Module
      */
     protected function postProcess()
     {
-        $form_values = $this->getConfigFormValues();
+        $days_config = [];
+        $days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
-        foreach (array_keys($form_values) as $key) {
-            Configuration::updateValue($key, Tools::getValue($key));
+        // Save the live mode setting
+        Configuration::updateValue('WEEKLYORDERSCHEDULE_LIVE_MODE', (bool) Tools::getValue('WEEKLYORDERSCHEDULE_LIVE_MODE'));
+
+        // Process each day's setting
+        foreach ($days as $day) {
+            $config_key = 'WEEKLYORDERSCHEDULE_DAY_' . strtoupper($day);
+            $days_config[$day] = (bool) Tools::getValue($config_key);
         }
+
+        // Save the days configuration as JSON
+        Configuration::updateValue('WEEKLYORDERSCHEDULE_DAYS', json_encode($days_config));
+
+        $this->context->controller->confirmations[] = $this->trans('Settings updated successfully', [], 'Modules.Weeklyorderschedule.Admin');
     }
 
     /**
-    * Add the CSS & JavaScript files you want to be loaded in the BO.
-    */
+     * Add the CSS & JavaScript files you want to be loaded in the BO.
+     */
     public function hookDisplayBackOfficeHeader()
     {
         if (Tools::getValue('configure') == $this->name) {
-            $this->context->controller->addJS($this->_path.'views/js/back.js');
-            $this->context->controller->addCSS($this->_path.'views/css/back.css');
+            $this->context->controller->addJS($this->_path . 'views/js/back.js');
+            $this->context->controller->addCSS($this->_path . 'views/css/back.css');
         }
     }
 
@@ -261,12 +317,50 @@ class Weeklyorderschedule extends Module
      */
     public function hookHeader()
     {
-        $this->context->controller->addJS($this->_path.'/views/js/front.js');
-        $this->context->controller->addCSS($this->_path.'/views/css/front.css');
+        $this->context->controller->addJS($this->_path . '/views/js/front.js');
+        $this->context->controller->addCSS($this->_path . '/views/css/front.css');
     }
 
-    public function hookActionCarrierProcess()
+    /**
+     * Create a default configuration for the days of the week
+     */
+    private function getDefaultDaysConfig()
     {
-        /* Place your code here. */
+        return [
+            'monday' => true,
+            'tuesday' => true,
+            'wednesday' => true,
+            'thursday' => true,
+            'friday' => true,
+            'saturday' => true,
+            'sunday' => true,
+        ];
+    }
+
+    /**
+     * Filtering the delivery options based on the current day of the week.
+     */
+    public function hookActionFilterDeliveryOptionList($params)
+    {
+        // Check if module is enabled
+        if (!Configuration::get('WEEKLYORDERSCHEDULE_LIVE_MODE', true)) {
+            return;
+        }
+
+        // Get the current day of the week
+        $current_day = strtolower(date('l'));
+
+        // Get the days configuration
+        $days_config = json_decode(Configuration::get('WEEKLYORDERSCHEDULE_DAYS', json_encode($this->getDefaultDaysConfig())), true);
+
+        // If today is enabled, do nothing
+        if (isset($days_config[$current_day]) && $days_config[$current_day]) {
+            return;
+        }
+
+        // If today is disabled, remove all carriers
+        if (isset($params['delivery_option_list'])) {
+            $params['delivery_option_list'] = [];
+        }
     }
 }
