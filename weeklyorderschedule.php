@@ -36,7 +36,7 @@ class Weeklyorderschedule extends Module
     {
         $this->name = 'weeklyorderschedule';
         $this->tab = 'checkout';
-        $this->version = '1.0.1';
+        $this->version = '1.0.2';
         $this->author = 'dewwwe';
         $this->need_instance = 0;
 
@@ -218,11 +218,28 @@ class Weeklyorderschedule extends Module
                         .form-wrapper .form-group label.control-label.col-lg-4 {
                             width: fit-content;
                         }
-                        .form-wrapper .form-group:has(.control-label.col-lg-4) {
+                        .form-wrapper .form-group:last-child {
                             display: flex;
-                            flex-direction: row-reverse;
+                            flex-direction: row;
+                            width: 100%;
+                        }
+                        .form-wrapper > .form-group:last-child .form-group {
+                            display: flex;
+                            flex-direction: column;
                             align-items: center;
-                            width: 350px;
+                            gap: 10px;
+                            flex: 1;
+                            border-right: 0.5px solid #000;
+                        }
+                        .form-wrapper > .form-group:last-child .form-group:nth-child(8) {
+                            border-right: none;
+                        }
+                        .form-wrapper > .form-group:last-child > div:first-child,
+                        .form-wrapper > .form-group:last-child > .form-group:last-child {
+                            display: none;
+                        }
+                        .form-wrapper .form-group:last-child .form-group div {
+                            width: 36px;
                         }
                         .bootstrap .prestashop-switch {
                             margin-top: 0;
@@ -285,8 +302,16 @@ class Weeklyorderschedule extends Module
             ],
         ];
 
-        // Add a switch for each day of the week
+        // Add this before your foreach loop
+        $form_inputs[] = [
+            'type' => 'html',
+            'name' => 'days_container_start',
+            'html_content' => '<div class="weekdays-container">',
+        ];
+
+        // Modify your day switches in the foreach loop
         foreach ($days as $day_key => $day_name) {
+
             $form_inputs[] = [
                 'type' => 'switch',
                 'label' => $day_name,
@@ -296,16 +321,24 @@ class Weeklyorderschedule extends Module
                     [
                         'id' => $day_key . '_on',
                         'value' => true,
-                        'label' => $this->trans('Enabled', [], 'Admin.Global')
+                        'label' => ''
                     ],
                     [
                         'id' => $day_key . '_off',
                         'value' => false,
-                        'label' => $this->trans('Disabled', [], 'Admin.Global')
+                        'label' => ''
                     ]
                 ],
             ];
+
         }
+
+        // Add this after your foreach loop
+        $form_inputs[] = [
+            'type' => 'html',
+            'name' => 'days_container_end',
+            'html_content' => '</div>',
+        ];
 
         return [
             'form' => [
