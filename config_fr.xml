@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <module>
     <name>weeklyorderschedule</name>
-    <displayName><![CDATA[Weekly order schedule]]></displayName>
+    <displayName><![CDATA[Calendrier des commandes hebdomadaires]]></displayName>
     <version><![CDATA[1.0.2]]></version>
-    <description><![CDATA[Disable ordering on specific weekdays by removing all carrier options]]></description>
+    <description><![CDATA[D&eacute;sactiver les commandes pour certains jours de la semaine en supprimant toutes les options de transporteur]]></description>
     <author><![CDATA[dewwwe]]></author>
     <tab><![CDATA[checkout]]></tab>
     <is_configurable>1</is_configurable>

@@ -289,6 +289,27 @@ class Weeklyorderschedule extends Module
             ],
             array(
                 'type' => 'html',
+                'name' => 'contact_link_label',
+                'html_content' => '<h4>' . $this->trans('Contact Link Configuration', [], 'Modules.Weeklyorderschedule.Admin') . '</h4>',
+            ),
+            array(
+                'col' => 6,
+                'type' => 'text',
+                'prefix' => '<i class="icon icon-external-link"></i>',
+                'desc' => $this->trans('Link text for the contact page (e.g., "Call Yann to discuss").', [], 'Modules.Weeklyorderschedule.Admin'),
+                'name' => 'WEEKLYORDERSCHEDULE_CONTACT_LINK_TEXT',
+                'label' => $this->trans('Contact Link Text', [], 'Modules.Weeklyorderschedule.Admin'),
+            ),
+            array(
+                'col' => 6,
+                'type' => 'text',
+                'prefix' => '<i class="icon icon-link"></i>',
+                'desc' => $this->trans('URL for the contact page (e.g., "/contact-us" or "tel:+33123456789").', [], 'Modules.Weeklyorderschedule.Admin'),
+                'name' => 'WEEKLYORDERSCHEDULE_CONTACT_LINK_URL',
+                'label' => $this->trans('Contact Link URL', [], 'Modules.Weeklyorderschedule.Admin'),
+            ),
+            array(
+                'type' => 'html',
                 'name' => 'weekdays_label',
                 'html_content' => '<h4>' . $this->trans('Order Days Configuration', [], 'Modules.Weeklyorderschedule.Admin') . '</h4>',
             ),
@@ -364,6 +385,8 @@ class Weeklyorderschedule extends Module
 
         $values = [
             'WEEKLYORDERSCHEDULE_LIVE_MODE' => Configuration::get('WEEKLYORDERSCHEDULE_LIVE_MODE', true),
+            'WEEKLYORDERSCHEDULE_CONTACT_LINK_TEXT' => Configuration::get('WEEKLYORDERSCHEDULE_CONTACT_LINK_TEXT', 'Call Yann to discuss'),
+            'WEEKLYORDERSCHEDULE_CONTACT_LINK_URL' => Configuration::get('WEEKLYORDERSCHEDULE_CONTACT_LINK_URL', '#'),
         ];
 
         // Add values for each day
@@ -384,6 +407,10 @@ class Weeklyorderschedule extends Module
 
         // Save the live mode setting
         Configuration::updateValue('WEEKLYORDERSCHEDULE_LIVE_MODE', (bool) Tools::getValue('WEEKLYORDERSCHEDULE_LIVE_MODE'));
+        
+        // Save contact link settings
+        Configuration::updateValue('WEEKLYORDERSCHEDULE_CONTACT_LINK_TEXT', Tools::getValue('WEEKLYORDERSCHEDULE_CONTACT_LINK_TEXT'));
+        Configuration::updateValue('WEEKLYORDERSCHEDULE_CONTACT_LINK_URL', Tools::getValue('WEEKLYORDERSCHEDULE_CONTACT_LINK_URL'));
 
         // Process each day's setting
         foreach ($days as $day) {
@@ -455,9 +482,15 @@ class Weeklyorderschedule extends Module
             return;
         }
 
-        // If today is disabled, remove all carriers
+        // If today is disabled, remove all carriers and set a flag
         if (isset($params['delivery_option_list'])) {
             $params['delivery_option_list'] = [];
+            // Set context variables to indicate orders are closed due to weekly schedule
+            $this->context->smarty->assign([
+                'weeklyScheduleOrdersClosed' => true,
+                'weeklyScheduleContactLinkText' => Configuration::get('WEEKLYORDERSCHEDULE_CONTACT_LINK_TEXT', 'Call Yann to discuss'),
+                'weeklyScheduleContactLinkUrl' => Configuration::get('WEEKLYORDERSCHEDULE_CONTACT_LINK_URL', '#')
+            ]);
         }
     }
 }
