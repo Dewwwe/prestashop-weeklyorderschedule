@@ -61,7 +61,7 @@ class Weeklyorderschedule extends Module
     {
         // Initialize default configuration
         Configuration::updateValue('WEEKLYORDERSCHEDULE_DAYS', json_encode($this->getDefaultDaysConfig()));
-        Configuration::updateValue('WEEKLYORDERSCHEDULE_LIVE_MODE', values: false);
+        Configuration::updateValue('WEEKLYORDERSCHEDULE_LIVE_MODE', false);
 
         return parent::install()
             // Add JS & CSS to front office
