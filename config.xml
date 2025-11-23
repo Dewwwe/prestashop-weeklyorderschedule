@@ -2,7 +2,7 @@
 <module>
     <name>weeklyorderschedule</name>
     <displayName><![CDATA[Weekly order schedule]]></displayName>
-    <version><![CDATA[1.0.2]]></version>
+    <version><![CDATA[1.1.7]]></version>
     <description><![CDATA[Disable ordering on specific weekdays by removing all carrier options]]></description>
     <author><![CDATA[dewwwe]]></author>
     <tab><![CDATA[checkout]]></tab>
