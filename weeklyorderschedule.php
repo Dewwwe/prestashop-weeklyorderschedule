@@ -36,7 +36,7 @@ class Weeklyorderschedule extends Module
     {
         $this->name = 'weeklyorderschedule';
         $this->tab = 'checkout';
-        $this->version = '1.1.7';
+        $this->version = '1.1.8';
         $this->author = 'dewwwe';
         $this->need_instance = 0;
 
@@ -70,6 +70,8 @@ class Weeklyorderschedule extends Module
             && $this->registerHook('displayBackOfficeHeader')
             // Filter the carrier options in the front office
             && $this->registerHook('actionFilterDeliveryOptionList')
+            // Hook for countdown display
+            && $this->registerHook('displayCountdown')
             // Install the quick access tab in the back office
             && $this->installTab();
     }
@@ -491,6 +493,122 @@ class Weeklyorderschedule extends Module
                 'weeklyScheduleContactLinkText' => Configuration::get('WEEKLYORDERSCHEDULE_CONTACT_LINK_TEXT', 'Call Yann to discuss'),
                 'weeklyScheduleContactLinkUrl' => Configuration::get('WEEKLYORDERSCHEDULE_CONTACT_LINK_URL', '#')
             ]);
+        }
+    }
+
+    /**
+     * Hook to display countdown to next order deadline
+     *
+     * Renders a dynamic countdown timer that adapts based on the weekly schedule:
+     * - When orders are open: shows countdown to closing time (23:59 before next OFF day)
+     * - When orders are closed but reopening: shows countdown to reopening time
+     * - When all days closed (holidays): shows "closed" message with no countdown
+     * Usage in .tpl: {hook h='displayCountdown' mod='weeklyorderschedule'}
+     */
+    public function hookDisplayCountdown($params)
+    {
+        $countdownData = $this->getCountdownData();
+
+        $this->context->smarty->assign($countdownData);
+
+        return $this->display(__FILE__, 'views/templates/hook/countdown.tpl');
+    }
+
+    /**
+     * Get countdown data including deadline timestamp and current state
+     *
+     * This method determines the countdown state based on weekly schedule configuration:
+     * - STATE 1 (open): Today is ON → countdown to 23:59 of day BEFORE next OFF day
+     * - STATE 2 (reopening): Today is OFF but will reopen → countdown to 23:59 of day BEFORE next ON day
+     * - STATE 3 (closed): All days OFF (holidays) → no countdown, show closed message
+     *
+     */
+    private function getCountdownData()
+    {
+        // Get the days configuration
+        $daysConfig = json_decode(Configuration::get('WEEKLYORDERSCHEDULE_DAYS'), true);
+
+        if (!$daysConfig) {
+            return [
+                'countdown_state' => 'closed',
+                'countdown_title' => 'À bientôt !',
+                'countdown_deadline' => null,
+                'countdown_subtitle' => 'Yann et son équipe sont en congés. Les commandes reprendront prochainement. Merci de votre fidélité !',
+                'countdown_button_text' => null,
+                'countdown_button_url' => null,
+            ];
+        }
+
+        $daysOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+        $currentDayIndex = (int)date('w'); // 0 (Sunday) to 6 (Saturday)
+        $currentDayName = $daysOfWeek[$currentDayIndex];
+        $currentTime = time();
+
+        // Check if today is enabled
+        $isTodayEnabled = isset($daysConfig[$currentDayName]) && $daysConfig[$currentDayName] === true;
+
+        if ($isTodayEnabled) {
+            // STATE 1: Today is ON - find next OFF day (when orders close)
+            for ($i = 1; $i <= 7; $i++) {
+                $checkDayIndex = ($currentDayIndex + $i) % 7;
+                $checkDayName = $daysOfWeek[$checkDayIndex];
+
+                if (isset($daysConfig[$checkDayName]) && $daysConfig[$checkDayName] === false) {
+                    // Orders close at 23:59 of the day BEFORE the OFF day
+                    $offDayTimestamp = strtotime('next ' . ucfirst($checkDayName));
+                    $deadlineTimestamp = strtotime('yesterday 23:59:59', $offDayTimestamp);
+
+                    return [
+                        'countdown_state' => 'open',
+                        'countdown_title' => 'Commandes ouvertes',
+                        'countdown_deadline' => $deadlineTimestamp,
+                        'countdown_subtitle' => 'avant la fermeture des commandes cette semaine',
+                        'countdown_button_text' => 'Commander maintenant',
+                        'countdown_button_url' => '/3-nos-produits',
+                    ];
+                }
+            }
+
+            // All days are enabled - no closing deadline
+            return [
+                'countdown_state' => 'always_open',
+                'countdown_title' => 'Nous sommes ouvertes',
+                'countdown_deadline' => null,
+                'countdown_subtitle' => 'Passez commande maintenant pour une livraison en fin de semaine',
+                'countdown_button_text' => 'Commander maintenant',
+                'countdown_button_url' => '/3-nos-produits',
+            ];
+        } else {
+            // STATE 2 or 3: Today is OFF - find next ON day (when orders reopen)
+            for ($i = 1; $i <= 7; $i++) {
+                $checkDayIndex = ($currentDayIndex + $i) % 7;
+                $checkDayName = $daysOfWeek[$checkDayIndex];
+
+                if (isset($daysConfig[$checkDayName]) && $daysConfig[$checkDayName] === true) {
+                    // STATE 2: Orders reopen at 23:59 of the day BEFORE the ON day
+                    $onDayTimestamp = strtotime('next ' . ucfirst($checkDayName));
+                    $deadlineTimestamp = strtotime('yesterday 23:59:59', $onDayTimestamp);
+
+                    return [
+                        'countdown_state' => 'reopening',
+                        'countdown_title' => 'On revient vite !',
+                        'countdown_deadline' => $deadlineTimestamp,
+                        'countdown_subtitle' => 'avant l\'ouverture des commandes. Nous préparons les livraisons.',
+                        'countdown_button_text' => 'Explorer le catalogue',
+                        'countdown_button_url' => '/3-nos-produits',
+                    ];
+                }
+            }
+
+            // STATE 3: All days are disabled (holidays/special closure)
+            return [
+                'countdown_state' => 'closed',
+                'countdown_title' => 'Nous sommes fermés !',
+                'countdown_deadline' => null,
+                'countdown_subtitle' => 'Yann et son équipe sont en congés. Les commandes reprendront prochainement. Merci de votre fidélité !',
+                'countdown_button_text' => null,
+                'countdown_button_url' => null,
+            ];
         }
     }
 }
