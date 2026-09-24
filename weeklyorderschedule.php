@@ -560,7 +560,7 @@ class Weeklyorderschedule extends Module
 
                     return [
                         'countdown_state' => 'open',
-                        'countdown_title' => 'Commandes ouvertes',
+                        'countdown_title' => 'Commandes ouvertes !',
                         'countdown_deadline' => $deadlineTimestamp,
                         'countdown_subtitle' => 'avant la fermeture des commandes cette semaine',
                         'countdown_button_text' => 'Commander maintenant',
@@ -572,7 +572,7 @@ class Weeklyorderschedule extends Module
             // All days are enabled - no closing deadline
             return [
                 'countdown_state' => 'always_open',
-                'countdown_title' => 'Nous sommes ouvertes',
+                'countdown_title' => 'Nous sommes ouverts !',
                 'countdown_deadline' => null,
                 'countdown_subtitle' => 'Passez commande maintenant pour une livraison en fin de semaine',
                 'countdown_button_text' => 'Commander maintenant',
