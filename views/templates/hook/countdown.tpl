@@ -1,4 +1,4 @@
-<!--
+{*
  * Countdown Timer Template - Weekly Order Schedule Module
  *
  * Displays a dynamic countdown that adapts to the weekly order schedule:
@@ -15,9 +15,8 @@
  *
  * JavaScript countdown updates every 60 seconds (1 minute)
  * Deadline is at 23:59 of the day before the OFF/ON transition
--->
+*}
 
-<!-- DEBUG: State={$countdown_state|default:'NOT_SET'} Deadline={$countdown_deadline|default:'NOT_SET'} -->
 <div class="cms-card flex-column countdown-card">
     {if $countdown_state == 'closed'}
     {* STATE 3: All days closed - No countdown, just message *}
